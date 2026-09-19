@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 
 import com.demo.product.product_service.dto.ProductRequest;
 import com.demo.product.product_service.dto.ProductResponse;
+import com.demo.product.product_service.dto.ProductSearchRequest;
 import com.demo.product.product_service.service.ProductService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,11 +32,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * REST endpoints for Product CRUD operations.
+ * REST endpoints for Product CRUD operations and catalog search.
  */
 @RestController
 @RequestMapping("/api/products")
-@Tag(name = "Products", description = "Create, read, update, and delete products")
+@Tag(name = "Products", description = "Create, read, update, delete, and search products")
 public class ProductController {
 
 	private final ProductService productService;
@@ -51,6 +52,23 @@ public class ProductController {
 					array = @ArraySchema(schema = @Schema(implementation = ProductResponse.class))))
 	public List<ProductResponse> getAll() {
 		return productService.findAll();
+	}
+
+	@GetMapping("/search")
+	@Operation(summary = "Search products",
+			description = "Requires a non-blank query parameter q. Returns products whose name or "
+					+ "description contains q (case-insensitive). An empty array means no matches, not a missing catalog.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200",
+					description = "Search succeeded. Body is the matching products, or an empty array when nothing matches.",
+					content = @Content(mediaType = "application/json",
+							array = @ArraySchema(schema = @Schema(implementation = ProductResponse.class)))),
+			@ApiResponse(responseCode = "400",
+					description = "Invalid input: q is missing, blank, or only whitespace.",
+					content = @Content(mediaType = "application/json"))
+	})
+	public List<ProductResponse> search(@Valid ProductSearchRequest request) {
+		return productService.search(request.getQ());
 	}
 
 	@GetMapping("/{id}")

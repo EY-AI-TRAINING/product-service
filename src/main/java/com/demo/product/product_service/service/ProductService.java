@@ -1,6 +1,7 @@
 package com.demo.product.product_service.service;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 
@@ -54,5 +55,25 @@ public class ProductService {
 			throw new ProductNotFoundException(id);
 		}
 		productRepository.deleteById(id);
+	}
+
+	public List<ProductResponse> search(String q) {
+		String term = q.trim().toLowerCase(Locale.ROOT);
+		return productRepository.findAll().stream()
+				.filter(product -> matches(product, term))
+				.map(ProductResponse::fromProduct)
+				.toList();
+	}
+
+	private boolean matches(Product product, String term) {
+		return containsIgnoreCase(product.getName(), term)
+				|| containsIgnoreCase(product.getDescription(), term);
+	}
+
+	private boolean containsIgnoreCase(String value, String term) {
+		if (value == null || value.isBlank()) {
+			return false;
+		}
+		return value.toLowerCase(Locale.ROOT).contains(term);
 	}
 }

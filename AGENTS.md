@@ -75,12 +75,13 @@ Base path: `/api/products`. JSON in and out.
 | Action | Method | Status |
 | --- | --- | --- |
 | List | `GET /api/products` | 200 + body |
+| Search | `GET /api/products/search` | 200 + body or 400 |
 | Get | `GET /api/products/{id}` | 200 or 404 |
 | Create | `POST /api/products` | 201 + `Location` + body |
 | Update | `PUT /api/products/{id}` | 200 or 404 |
 | Delete | `DELETE /api/products/{id}` | 204 or 404 |
 
-Validate inputs with `@Valid` on `@RequestBody` and Jakarta constraints on `ProductRequest` (`@NotBlank` name, `@NotNull` + `@DecimalMin("0.0")` price).
+Validate inputs with `@Valid` on `@RequestBody` and Jakarta constraints on `ProductRequest` (`@NotBlank` name, `@NotNull` + `@DecimalMin("0.0")` price). Search uses `@Valid` `ProductSearchRequest` (`@NotBlank` `q`).
 
 Missing products throw `ProductNotFoundException`; `@RestControllerAdvice` maps it to 404. Do not catch that in the controller.
 

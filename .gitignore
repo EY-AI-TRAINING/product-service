@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Build artifacts ###
+*.class
+*.jar
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+.env*
