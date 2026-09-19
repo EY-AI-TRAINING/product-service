@@ -1,0 +1,18 @@
+---
+description: Keep Springdoc OpenAPI annotations and config in sync with the API
+globs: "**/config/OpenApiConfig.java,**/controller/**/*.java,**/dto/**/*.java,**/application.yaml"
+alwaysApply: false
+---
+
+# OpenAPI
+
+springdoc 3.x (`springdoc-openapi-starter-webmvc-ui`). Config bean: `OpenApiConfig` (`title`, `description`, `version`). YAML: `/v3/api-docs`, `/swagger-ui.html`, `paths-to-match: /api/**`.
+
+When adding or changing an endpoint:
+
+- Annotate the controller with `@Tag`, `@Operation`, and `@ApiResponse` / `@ApiResponses` for every status the handler can return (200/201/204, 400, 404)
+- Document path params with `@Parameter`
+- Keep DTO `@Schema` (description, example, `requiredMode` where required)
+- Do not document paths outside `/api/**` unless `springdoc.paths-to-match` is updated
+
+Create responses must include the `Location` header in `@ApiResponse`. Delete success is 204 with empty content (`@Content` and no schema).

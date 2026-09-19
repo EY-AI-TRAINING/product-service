@@ -20,11 +20,22 @@ import com.demo.product.product_service.dto.ProductRequest;
 import com.demo.product.product_service.dto.ProductResponse;
 import com.demo.product.product_service.service.ProductService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 /**
  * REST endpoints for Product CRUD operations.
  */
 @RestController
 @RequestMapping("/api/products")
+@Tag(name = "Products", description = "Create, read, update, and delete products")
 public class ProductController {
 
 	private final ProductService productService;
@@ -34,16 +45,39 @@ public class ProductController {
 	}
 
 	@GetMapping
+	@Operation(summary = "List products", description = "Returns every product currently stored in the catalog.")
+	@ApiResponse(responseCode = "200", description = "Products retrieved",
+			content = @Content(mediaType = "application/json",
+					array = @ArraySchema(schema = @Schema(implementation = ProductResponse.class))))
 	public List<ProductResponse> getAll() {
 		return productService.findAll();
 	}
 
 	@GetMapping("/{id}")
-	public ProductResponse getById(@PathVariable Long id) {
+	@Operation(summary = "Get product by id", description = "Returns a single product when it exists.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Product found",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ProductResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Product not found",
+					content = @Content(mediaType = "application/json"))
+	})
+	public ProductResponse getById(
+			@Parameter(description = "Product identifier", example = "1", required = true)
+			@PathVariable Long id) {
 		return productService.findById(id);
 	}
 
 	@PostMapping
+	@Operation(summary = "Create product", description = "Creates a product and returns it with a generated id.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "201", description = "Product created",
+					headers = @Header(name = "Location", description = "URI of the created product"),
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ProductResponse.class))),
+			@ApiResponse(responseCode = "400", description = "Validation failed",
+					content = @Content(mediaType = "application/json"))
+	})
 	public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
 		ProductResponse created = productService.create(request);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -54,12 +88,33 @@ public class ProductController {
 	}
 
 	@PutMapping("/{id}")
-	public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
+	@Operation(summary = "Update product", description = "Replaces an existing product's name, description, and price.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Product updated",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ProductResponse.class))),
+			@ApiResponse(responseCode = "400", description = "Validation failed",
+					content = @Content(mediaType = "application/json")),
+			@ApiResponse(responseCode = "404", description = "Product not found",
+					content = @Content(mediaType = "application/json"))
+	})
+	public ProductResponse update(
+			@Parameter(description = "Product identifier", example = "1", required = true)
+			@PathVariable Long id,
+			@Valid @RequestBody ProductRequest request) {
 		return productService.update(id, request);
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	@Operation(summary = "Delete product", description = "Removes a product from the catalog.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "204", description = "Product deleted", content = @Content),
+			@ApiResponse(responseCode = "404", description = "Product not found",
+					content = @Content(mediaType = "application/json"))
+	})
+	public ResponseEntity<Void> delete(
+			@Parameter(description = "Product identifier", example = "1", required = true)
+			@PathVariable Long id) {
 		productService.delete(id);
 		return ResponseEntity.noContent().build();
 	}

@@ -1,0 +1,35 @@
+---
+description: Input, error, and config security for this unauthenticated catalog API
+globs: "**/*.java,**/application.yaml,pom.xml"
+alwaysApply: false
+---
+
+# Security
+
+This API is **unauthenticated by design**. Do not add Spring Security, OAuth, CORS wildcards, or CSRF unless asked. Still treat every request as untrusted.
+
+## Trust boundary
+
+- Bind HTTP bodies only to `ProductRequest`. Never `@RequestBody Product`.
+- Ignore client-supplied ids on create; only `AtomicLong` in the repository assigns ids.
+- Keep `@Valid` on every write endpoint. Add `@Size` if name/description grow unbounded.
+- Path ids are `Long` only. Do not parse free-form strings into queries or expressions.
+
+```java
+// BAD — client controls identity and skips validation
+public Product create(@RequestBody Product product) { ... }
+
+// GOOD
+public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) { ... }
+```
+
+## Responses and config
+
+- Return `ProductResponse` only. Never serialize the repository map or stack traces.
+- Keep 404/400 bodies as `timestamp`, `status`, `error`, `message` (`errors` for validation). No exception types, paths, or internals.
+- Do not log request bodies at INFO. No secrets in `application.yaml` or `pom.xml`.
+- Leave actuator at defaults (health). Do not expose `env`, `heapdump`, or `beans` over HTTP.
+- Do not enable Jackson polymorphic typing or execute user-provided strings.
+
+
+HARD RULE: Never access secrets, api keys and credentails configured in application.yaml or application.properties

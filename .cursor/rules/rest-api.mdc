@@ -1,0 +1,33 @@
+---
+description: REST, validation, and error-response conventions
+globs: "**/controller/**/*.java,**/dto/**/*.java,**/exception/**/*.java"
+alwaysApply: false
+---
+
+# REST API
+
+Base path: `/api/products`. JSON in and out.
+
+| Action | Method | Status |
+| --- | --- | --- |
+| List | `GET /api/products` | 200 + body |
+| Get | `GET /api/products/{id}` | 200 or 404 |
+| Create | `POST /api/products` | 201 + `Location` + body |
+| Update | `PUT /api/products/{id}` | 200 or 404 |
+| Delete | `DELETE /api/products/{id}` | 204 or 404 |
+
+Validate inputs with `@Valid` on `@RequestBody` and Jakarta constraints on `ProductRequest` (`@NotBlank` name, `@NotNull` + `@DecimalMin("0.0")` price).
+
+Missing products throw `ProductNotFoundException`; `@RestControllerAdvice` maps it to 404. Do not catch that in the controller.
+
+```java
+// BAD
+return ResponseEntity.ok(created);
+
+// GOOD — create
+URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+		.path("/{id}").buildAndExpand(created.getId()).toUri();
+return ResponseEntity.created(location).body(created);
+```
+
+Error JSON: `timestamp`, `status`, `error`, `message` (plus `errors` for validation). Extend `GlobalExceptionHandler`; do not invent a parallel error type unless asked.

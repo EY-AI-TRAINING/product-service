@@ -1,0 +1,29 @@
+---
+description: Java 21 style, packaging, and layering for this service
+globs: "**/*.java"
+alwaysApply: false
+---
+
+# Java conventions
+
+- Package: `com.demo.product.product_service.<layer>`
+- Indent with **tabs**. Match neighboring files.
+- Constructor injection for Spring beans. No `@Autowired` on fields.
+- Plain JavaBeans: no-arg + all-args constructors, getters/setters. Do not convert existing types to records or add Lombok.
+- Public types get a short Javadoc. Keep methods small and named after the HTTP/business action (`findAll`, `create`, `update`).
+
+## Mapping
+
+```java
+// BAD — leak Product from the controller
+return productRepository.findById(id);
+
+// GOOD — service maps to ProductResponse
+return ProductResponse.fromProduct(product);
+```
+
+New writes go through `ProductRequest` → `Product` in the service. Add factory/mapper methods on the DTO (see `ProductResponse.fromProduct`), not on the controller.
+
+## Money and ids
+
+Use `BigDecimal` for price and `Long` for ids. Do not switch price to `double`.

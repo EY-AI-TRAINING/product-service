@@ -1,0 +1,29 @@
+---
+description: MockMvc / Spring Boot 4 test conventions
+globs: "src/test/**/*.java"
+alwaysApply: false
+---
+
+# Tests
+
+Controller coverage lives in `ProductControllerTest`: `@SpringBootTest` + `@AutoConfigureMockMvc` (import from `org.springframework.boot.webmvc.test.autoconfigure`). Hit the real in-memory store; do not mock the repository unless a unit test is explicitly requested.
+
+Jackson 3: `tools.jackson.databind.ObjectMapper` — not `com.fasterxml.jackson.databind.ObjectMapper`.
+
+## Style
+
+- Method names: `createReturnsCreatedWithLocationAndBody`, `getByIdReturnsNotFoundForMissingProduct`
+- Assert HTTP status, `Location` on create, and JSON fields with `jsonPath`
+- Cover happy path **and** 400/404 for each mutating/read-by-id endpoint
+- After delete, GET the same id and expect 404
+- Keep OpenAPI checks: `GET /v3/api-docs` title + product paths; Swagger UI redirects
+
+```java
+mockMvc.perform(post("/api/products")
+		.contentType(MediaType.APPLICATION_JSON)
+		.content(objectMapper.writeValueAsString(request)))
+		.andExpect(status().isCreated())
+		.andExpect(header().exists("Location"));
+```
+
+The in-memory store is process-wide for the test JVM; use ids returned from create, not hardcoded `1L`.

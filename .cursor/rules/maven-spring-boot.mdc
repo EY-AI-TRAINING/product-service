@@ -1,0 +1,19 @@
+---
+description: Spring Boot 4 Maven starters, Java 21, and application.yaml
+globs: "pom.xml,**/application.yaml"
+alwaysApply: false
+---
+
+# Build and config
+
+Parent: `spring-boot-starter-parent` **4.1.1**. Property: `<java.version>21</java.version>`. Use `./mvnw`; do not add Gradle.
+
+## Starters (Boot 4 names)
+
+- Web: `spring-boot-starter-webmvc` (not `spring-boot-starter-web`)
+- Tests: `spring-boot-starter-webmvc-test`, `spring-boot-starter-actuator-test`
+- Already present: validation, actuator, devtools, `springdoc-openapi-starter-webmvc-ui` 3.1.1
+
+Do not add JPA, security, or extra starters unless asked. Pin springdoc only; other versions come from the parent BOM.
+
+`application.yaml` keeps `spring.application.name: product-service` and springdoc paths. Prefer YAML over `application.properties`. No secrets belong in this file (there is no datasource).

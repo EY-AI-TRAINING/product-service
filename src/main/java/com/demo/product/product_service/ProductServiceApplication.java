@@ -9,9 +9,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ProductServiceApplication {
 
 	public static void main(String[] args) {
-		System.out.println("Hello World");
-		// print the current date and time
-		System.out.println(LocalDateTime.now());
 		SpringApplication.run(ProductServiceApplication.class, args);
 	}
 

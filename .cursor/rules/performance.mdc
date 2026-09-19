@@ -1,0 +1,34 @@
+---
+description: In-memory catalog performance and concurrency
+globs: "**/repository/**/*.java,**/service/**/*.java,**/controller/**/*.java"
+alwaysApply: false
+---
+
+# Performance
+
+The catalog is an in-memory `ConcurrentHashMap` plus `AtomicLong`. It is already O(1) by id. Do not add caching, paging frameworks, or extra synchronization unless asked.
+
+## Store access
+
+- Keep id lookup as `store.get(id)` / `containsKey`. Never scan `values()` to find one product.
+- `findAll` must return a **snapshot** (`new ArrayList<>(store.values())`), not the live map.
+- Do not wrap `ConcurrentHashMap` in `synchronized` or replace it with a non-concurrent `HashMap`.
+- Allocate ids only with `idGenerator.incrementAndGet()`.
+
+```java
+// BAD — O(n) lookup and racy id
+store.values().stream().filter(p -> p.getId().equals(id)).findFirst();
+product.setId((long) store.size() + 1);
+
+// GOOD
+return Optional.ofNullable(store.get(id));
+product.setId(idGenerator.incrementAndGet());
+```
+
+## Service and HTTP
+
+- Map with a single `stream().map(ProductResponse::fromProduct).toList()`; do not copy the list twice.
+- Prefer `existsById` then `save`/`delete` over extra full-entity reads when the value is unused.
+- Keep `price` as `BigDecimal` (no `double` in hot paths).
+- Controllers stay thin: no extra loops, sleeps, or per-request collection copies beyond the repository snapshot.
+- The store is unbounded and process-local; do not load it into another in-memory structure for reads.

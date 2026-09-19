@@ -157,4 +157,19 @@ class ProductControllerTest {
 		mockMvc.perform(delete("/api/products/{id}", 999_999L))
 				.andExpect(status().isNotFound());
 	}
+
+	@Test
+	void openApiDocsDescribeProductEndpoints() throws Exception {
+		mockMvc.perform(get("/v3/api-docs"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.info.title").value("Product Service API"))
+				.andExpect(jsonPath("$.paths['/api/products']").exists())
+				.andExpect(jsonPath("$.paths['/api/products/{id}']").exists());
+	}
+
+	@Test
+	void swaggerUiIsAvailable() throws Exception {
+		mockMvc.perform(get("/swagger-ui.html"))
+				.andExpect(status().is3xxRedirection());
+	}
 }

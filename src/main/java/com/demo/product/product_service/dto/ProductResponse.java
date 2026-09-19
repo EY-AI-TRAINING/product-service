@@ -4,14 +4,21 @@ import java.math.BigDecimal;
 
 import com.demo.product.product_service.model.Product;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Outgoing payload representing a Product.
  */
+@Schema(description = "Product returned by the API")
 public class ProductResponse {
 
+	@Schema(description = "Generated product identifier", example = "1")
 	private Long id;
+	@Schema(description = "Product name", example = "Widget")
 	private String name;
+	@Schema(description = "Product description", example = "A simple widget")
 	private String description;
+	@Schema(description = "Unit price", example = "9.99")
 	private BigDecimal price;
 
 	public ProductResponse() {

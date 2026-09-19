@@ -1,0 +1,31 @@
+---
+description: Product Service stack, layout, and non-negotiable architecture
+alwaysApply: true
+---
+
+# Product Service
+
+Spring Boot **4.1.1** REST catalog (`com.demo.product.product_service`). Java **21**. Maven Wrapper (`./mvnw`). No database, no JPA, no Lombok, no records.
+
+## Layers (keep this split)
+
+- `controller` — HTTP only; never talk to the repository
+- `service` — CRUD orchestration; map `Product` ↔ DTOs
+- `repository` — thread-safe in-memory `ConcurrentHashMap` + `AtomicLong` ids
+- `model` — domain `Product`
+- `dto` — `ProductRequest` (in) / `ProductResponse` (out)
+- `exception` — domain exceptions + `@RestControllerAdvice`
+- `config` — Spring beans (OpenAPI, etc.)
+
+## Do not introduce without an explicit request
+
+Persistence (JPA/JDBC), security, caching, messaging, or extra modules. Prefer constructor injection and existing types.
+
+## Build / run
+
+```bash
+./mvnw test
+./mvnw spring-boot:run
+```
+
+API base path: `/api/products`. Docs: `/v3/api-docs`, `/swagger-ui.html`.
