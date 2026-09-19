@@ -1,8 +1,6 @@
 spring:
   application:
     name: product-service
-    secret: asdfadls134$#@%asdfadls1234567890
-    api-key: asdfadls134$#@%asdfadls1234567890
 
 springdoc:
   api-docs:

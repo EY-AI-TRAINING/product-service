@@ -1,0 +1,5 @@
+# Local secrets and key material
+.env
+.env.*
+*.pem
+*.key
